@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}
+    QTour - a tournament registration and management system
+{% endblock %}
+
+{% block header %}
+    <div class='row'>
+        <div class='col-md-12'>
+            {% include "header.html" %}
+        </div>
+    </div>
+{% endblock %}
+
+{% block content %}
+
+<div class="row">
+    <div class="col-md-2">
+        {% block sidebar %}
+            {% include "sidebar.html" %}
+        {% endblock %}
+    </div>
+    <div class="col-md-10">
+        {% block main_content %}{% endblock %}
+    </div>
+</div>
+
+{% endblock %}
