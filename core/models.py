@@ -20,13 +20,19 @@ class Tournament(models.Model):
 
     multiple_sites = models.BooleanField(default=False)
 
+    owner = models.ForeignKey(QTourUser)
+
 
 class TournamentSite(models.Model):
 
     tournament = models.ForeignKey(Tournament)
+
+    site_name = models.CharField(max_length=500)
+
     address = models.CharField(max_length=500)
     city = models.CharField(max_length=100)
-    state = models.CharField(max_length=4, choices=[(state.abbr, state.name) for state in us.STATES])
+    state = models.CharField(max_length=4, choices=[(state.abbr, state.name) for state in us.STATES], null=True)
+    zip = models.CharField(max_length=5)
     country = models.CharField(max_length=100)
 
     owner = models.ForeignKey(QTourUser)

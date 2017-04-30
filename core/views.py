@@ -141,27 +141,129 @@ def create_tournament(request):
 
     if request.method == 'GET':
 
-        form = TournamentForm()
+        form = TournamentForm(mode='add')
         return render(request, 'tournament/tournament.html', {'form': form,
                                                               'user': get_user(request)})
 
     elif request.method == 'POST':
 
-        form = TournamentForm(data=request.POST)
+        form = TournamentForm(data=request.POST, mode='add')
         if form.is_valid():
             tour = form.save()
+            tour.owner = get_user(request)
+            tour.save()
 
             return HttpResponseRedirect('/edit_tournament/{}'.format(tour.id))
+
 
 @login_required
 def edit_tournament(request, tour_id):
 
+    qtour_user = get_user(request)
+    tournament = Tournament.objects.get(id=tour_id)
+
+    if tournament.owner == qtour_user:
+        if request.method == 'GET':
+            tournament = Tournament.objects.get(id=tour_id)
+            form = TournamentForm(instance=tournament, mode='edit')
+            return render(request, 'tournament/tournament.html', {'form': form,
+                                                                  'mode': 'edit',
+                                                                  'tour_id': tour_id,
+                                                                  'user': get_user(request)})
+
+        elif request.method == 'POST':
+
+            form = TournamentForm(data=request.POST, mode='edit', tour_id=tour_id)
+            if form.is_valid():
+                tournament.name = form.cleaned_data['name']
+                tournament.date = form.cleaned_data['date']
+                tournament.base_fee = form.cleaned_data['base_fee']
+                tournament.save()
+
+            return render(request, 'tournament/tournament.html', {'form': form,
+                                                                  'tour_id': tour_id,
+                                                                  'user': qtour_user})
+
+
+@login_required
+def add_site(request, tour_id):
+
+    qtour_user = get_user(request)
+    tournament = Tournament.objects.get(id=tour_id)
+
+    if tournament.owner == qtour_user:
+        if request.method == 'GET':
+            form = TournamentSiteForm(tour_id=tour_id, mode='add')
+            return render(request, 'tournament/site.html', {'form': form,
+                                                            'tour_id': tour_id,
+                                                            'user': qtour_user})
+
+        if request.method == 'POST':
+            form = TournamentSiteForm(data=request.POST, tour_id=tour_id, mode='add')
+            if form.is_valid():
+                site = TournamentSite()
+                site.address = form.cleaned_data['address']
+                site.city = form.cleaned_data['city']
+                site.state = form.cleaned_data['state']
+                site.site_name = form.cleaned_data['site_name']
+                site.zip = form.cleaned_data['zip']
+                site.country = form.cleaned_data['country']
+                site.tournament = Tournament.objects.get(id=int(form.cleaned_data['tournament']))
+                site.owner = qtour_user
+                site.save()
+                return HttpResponseRedirect('/edit_tournament/{}/'.format(tour_id))
+            else:
+                return render(request, 'tournament/site.html', {'form': form,
+                                                                'tour_id': tour_id,
+                                                                'user': qtour_user})
+
+
+def edit_site(request, site_id):
+
+    qtour_user = get_user(request)
+    site = TournamentSite.objects.get(id=site_id)
+    tournament = site.tournament
+
+    if tournament.owner == qtour_user or site.owner == qtour_user:
+        if request.method == 'GET':
+            form = TournamentSiteForm(instance=site, tour_id=tournament.id, mode='edit')
+            return render(request, 'tournament/site.html', {'form': form,
+                                                            'tour_id': tournament.id,
+                                                            'user': qtour_user})
+        elif request.method == 'POST':
+            form = TournamentSiteForm(data=request.POST, tour_id=tournament.id, mode='edit')
+            if form.is_valid():
+                site.address = form.cleaned_data['address']
+                site.city = form.cleaned_data['city']
+                site.state = form.cleaned_data['state']
+                site.site_name = form.cleaned_data['site_name']
+                site.zip = form.cleaned_data['zip']
+                site.country = form.cleaned_data['country']
+                site.save()
+
+            return render(request, 'tournament/site.html', {'form': form,
+                                                            'tour_id': tournament.id,
+                                                            'user': qtour_user})
+
+
+@login_required
+def your_tournaments(request):
+
     if request.method == 'GET':
-        tournament = Tournament.objects.get(id=tour_id)
-        form = TournamentForm(instance=tournament)
-        form.helper.add_input(Button('Add site', 'Add site', css_class='btn-default',
-                                     css_id='add-site', data_tour_id=tour_id))
-        return render(request, 'tournament/tournament.html', {'form': form,
-                                                              'mode': 'edit',
-                                                              'tour_id': tour_id,
-                                                              'user': get_user(request)})
+        qtour_user = get_user(request)
+        tournaments = Tournament.objects.filter(owner=qtour_user)
+        return render(request, 'tournament/tournaments.html', {'user': qtour_user,
+                                                               'tournaments': tournaments})
+
+
+@login_required
+def upcoming_tournaments(request):
+
+    pass #if request.method == 'GET':
+
+
+
+@login_required
+def past_tournaments(request):
+
+    pass

@@ -24,5 +24,10 @@ urlpatterns = [
     url(r'^login/$', qlogin),
     url(r'^$', main),
     url(r'^create_tournament/$', create_tournament),
-    url(r'^edit_tournament/(?P<tour_id>[\d]+)/$', edit_tournament)
+    url(r'^your_tournaments/$', your_tournaments),
+    url(r'^upcoming_tournaments/$', upcoming_tournaments),
+    url(r'^past_tournaments/$', past_tournaments),
+    url(r'^edit_tournament/(?P<tour_id>[\d]+)/$', edit_tournament),
+    url(r'^add_site/(?P<tour_id>[\d]+)/$', add_site),
+    url(r'^edit_site/(?P<site_id>[\d]+)/$', edit_site)
 ]
