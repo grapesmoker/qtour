@@ -18,7 +18,10 @@ class Tournament(models.Model):
     location = models.CharField(max_length=500, null=True)
     base_fee = models.PositiveIntegerField()
 
-    multiple_sites = models.BooleanField(default=False)
+    acf = models.BooleanField(default=False)
+
+    description = models.TextField(null=True)
+    announcement_url = models.URLField(null=True)
 
     owner = models.ForeignKey(QTourUser)
 

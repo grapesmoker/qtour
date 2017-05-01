@@ -1,15 +1,23 @@
 {% block sidebar %}
     <nav class="nav nav-sidebar">
         <ul class="nav nav-sidebar">
-            <li><a href="/your_tournaments">Your Tournaments</a></li>
-            <li><a href="/upcoming_tournaments">Upcoming Tournaments</a></li>
-            <li><a href="/past_tournaments">Past Tournaments</a></li>
-            <li><a href="/create_tournament">Create New Tournament</a></li>
+            <li>
+                <a data-toggle="collapse" href="#tournaments">Tournaments</a>
+            </li>
+            <ul class="nav nav-sidebar collapse" id="tournaments">
+                <li><a href="/your_tournaments">Your Tournaments</a></li>
+                <li><a href="/upcoming_tournaments">Upcoming Tournaments</a></li>
+                <li><a href="/past_tournaments">Past Tournaments</a></li>
+                <li><a href="/create_tournament">Create New Tournament</a></li>
+            </ul>
+            <li>
+                <a data-toggle="collapse" href="#schools">Schools</a>
+            </li>
             <li class="divider"></li>
-
-        </ul>
-        <ul class="nav nav-sidebar">
-            <li><a href="#">Manage Schools</a></li>
+            <ul class="nav nav-sidebar collapse" id="schools">
+                <li><a href="#">Manage Schools</a></li>
+                <li><a href="#">Add School</a></li>
+            </ul>
             <li><a href="#">Registrations</a></li>
         </ul>
     </nav>

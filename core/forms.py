@@ -24,7 +24,7 @@ class TournamentForm(ModelForm):
         if 'mode' in kwargs:
             self.mode = kwargs.pop('mode')
         else:
-            self.mode = 'edit'
+            self.mode = 'view'
 
         if 'tour_id' in kwargs:
             self.tour_id = kwargs.pop('tour_id')
@@ -45,11 +45,10 @@ class TournamentForm(ModelForm):
             self.site_html += '<label class="control-label col-sm-2">Sites</label>'
             self.site_html += '<div class="col-sm-10 controls">'
             for site in self.sites:
-                self.site_html += '<p><a href="/edit_site/{}">{}</a></p>'.format(site.id, site.site_name)
-            #self.site_html += '</ul>'
-            self.site_html += '<a href="/add_site/{}" class="btn btn-default">Add site</a>'.format(self.model.id)
+                self.site_html += '<p><a href="/site/{}">{}</a></p>'.format(site.id, site.site_name)
+            if self.mode == 'edit':
+                self.site_html += '<a href="/add_site/{}" class="btn btn-default">Add site</a>'.format(self.model.id)
             self.site_html += '</div></div>'
-            #self.site_list = HTML(site_html)
         else:
             self.model = None
             self.site_html = ''
@@ -61,7 +60,7 @@ class TournamentForm(ModelForm):
         if self.mode == 'add':
             self.helper.form_action = '/create_tournament/'
         elif self.mode == 'edit' and self.tour_id is not None:
-            self.helper.form_action = '/edit_tournament/{}/'.format(self.tour_id)
+            self.helper.form_action = '/tournament/{}/'.format(self.tour_id)
 
         self.helper.form_class = 'form-horizontal'
         self.helper.label_class = 'col-sm-2'
@@ -77,8 +76,13 @@ class TournamentForm(ModelForm):
             )
         )
 
-        self.helper.add_input(Submit('submit', 'Submit'))
+        if self.mode == 'add' or self.mode == 'edit':
+            self.helper.add_input(Submit('submit', 'Submit'))
+
         self.fields['date'].widget = Html5DateInput()
+        if self.mode == 'view':
+            for key in self.fields.keys():
+                self.fields[key].widget.attrs['disabled'] = True
 
 
 class TournamentSiteForm(ModelForm):
@@ -97,7 +101,7 @@ class TournamentSiteForm(ModelForm):
         if 'mode' in kwargs:
             self.mode = kwargs.pop('mode')
         else:
-            self.mode = 'edit'
+            self.mode = 'view'
 
         self.model = kwargs.get('instance', None)
 
@@ -109,7 +113,7 @@ class TournamentSiteForm(ModelForm):
         if self.mode == 'add':
             self.helper.form_action = '/add_site/{}/'.format(self.tour_id)
         elif self.mode == 'edit' and self.model is not None:
-            self.helper.form_action = '/edit_site/{}/'.format(self.model.id)
+            self.helper.form_action = '/site/{}/'.format(self.model.id)
         self.helper.label_class = 'col-sm-2'
         self.helper.field_class = 'col-sm-10'
 
@@ -120,3 +124,6 @@ class TournamentSiteForm(ModelForm):
             self.helper.add_input(Submit('submit', 'Add site'))
         elif self.mode == 'edit':
             self.helper.add_input(Submit('submit', 'Submit'))
+        elif self.mode == 'view':
+            for key in self.fields.keys():
+                self.fields[key].widget.attrs['disabled'] = True

@@ -3,7 +3,7 @@
 {% block main_content %}
     <div class="col-md-12">
         <table class="table table-striped table-hover">
-            <caption>Your tournaments</caption>
+            <caption>{{ caption }}</caption>
             <thead>
                 <tr>
                     <th>Name</th>
@@ -14,12 +14,22 @@
             <tbody>
                 {% for tournament in tournaments %}
                     <tr>
-                        <td><a href="/edit_tournament/{{ tournament.id }}">{{ tournament.name }}</a></td>
+                        {% if tournament.owner == user %}
+                            <td><a href="/tournament/{{ tournament.id }}">{{ tournament.name }}</a></td>
+                        {% else %}
+                            <td><a href="/tournament/{{ tournament.id }}">{{ tournament.name }}</a></td>
+                        {% endif %}
                         <td>{{ tournament.date }}</td>
                         <td>
-                            {% for site in tournament.tournamentsite_set.all %}
-                                <p><a href="/edit_site/{{ site.id }}">{{ site.site_name }}</a></p>
-                            {% endfor %}
+                            {% if tournament.owner == user %}
+                                {% for site in tournament.tournamentsite_set.all %}
+                                    <p><a href="/site/{{ site.id }}">{{ site.site_name }}</a></p>
+                                {% endfor %}
+                            {% else %}
+                                {% for site in tournament.tournamentsite_set.all %}
+                                    <p><a href="/site/{{ site.id }}">{{ site.site_name }}</a></p>
+                                {% endfor %}
+                            {% endif %}
                         </td>
                     </tr>
                 {% endfor %}

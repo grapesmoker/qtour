@@ -13,6 +13,7 @@ from core.forms import *
 
 from crispy_forms.layout import Button
 
+import datetime as dt
 
 def get_user(request):
 
@@ -153,11 +154,11 @@ def create_tournament(request):
             tour.owner = get_user(request)
             tour.save()
 
-            return HttpResponseRedirect('/edit_tournament/{}'.format(tour.id))
+            return HttpResponseRedirect('/tournament/{}'.format(tour.id))
 
 
 @login_required
-def edit_tournament(request, tour_id):
+def tournament(request, tour_id):
 
     qtour_user = get_user(request)
     tournament = Tournament.objects.get(id=tour_id)
@@ -183,6 +184,15 @@ def edit_tournament(request, tour_id):
             return render(request, 'tournament/tournament.html', {'form': form,
                                                                   'tour_id': tour_id,
                                                                   'user': qtour_user})
+
+
+    else:
+        if request.method == 'GET':
+            tournament = Tournament.objects.get(id=tour_id)
+            form = TournamentForm(instance=tournament, mode='view')
+            return render(request, 'tournament/site.html', {'form': form,
+                                                            'tour_id': tour_id,
+                                                            'user': qtour_user})
 
 
 @login_required
@@ -211,14 +221,15 @@ def add_site(request, tour_id):
                 site.tournament = Tournament.objects.get(id=int(form.cleaned_data['tournament']))
                 site.owner = qtour_user
                 site.save()
-                return HttpResponseRedirect('/edit_tournament/{}/'.format(tour_id))
+                return HttpResponseRedirect('/tournament/{}/'.format(tour_id))
             else:
                 return render(request, 'tournament/site.html', {'form': form,
                                                                 'tour_id': tour_id,
                                                                 'user': qtour_user})
 
 
-def edit_site(request, site_id):
+@login_required
+def site(request, site_id):
 
     qtour_user = get_user(request)
     site = TournamentSite.objects.get(id=site_id)
@@ -245,6 +256,13 @@ def edit_site(request, site_id):
                                                             'tour_id': tournament.id,
                                                             'user': qtour_user})
 
+    else:
+        if request.method == 'GET':
+            form = TournamentSiteForm(instance=site, tour_id=tournament.id, mode='view')
+            return render(request, 'tournament/site.html', {'form': form,
+                                                            'tour_id': tournament.id,
+                                                            'user': qtour_user})
+
 
 @login_required
 def your_tournaments(request):
@@ -253,17 +271,26 @@ def your_tournaments(request):
         qtour_user = get_user(request)
         tournaments = Tournament.objects.filter(owner=qtour_user)
         return render(request, 'tournament/tournaments.html', {'user': qtour_user,
-                                                               'tournaments': tournaments})
+                                                               'tournaments': tournaments,
+                                                               'caption': 'Your tournaments'})
 
 
 @login_required
 def upcoming_tournaments(request):
 
-    pass #if request.method == 'GET':
-
-
+    if request.method == 'GET':
+        qtour_user = get_user(request)
+        tournaments = Tournament.objects.filter(date__gt=dt.date.today())
+        return render(request, 'tournament/tournaments.html', {'user': qtour_user,
+                                                               'tournaments': tournaments,
+                                                               'caption': 'Upcoming tournaments'})
 
 @login_required
 def past_tournaments(request):
 
-    pass
+    if request.method == 'GET':
+        qtour_user = get_user(request)
+        tournaments = Tournament.objects.filter(date__lt=dt.date.today())
+        return render(request, 'tournament/tournaments.html', {'user': qtour_user,
+                                                               'tournaments': tournaments,
+                                                               'caption': 'Past tournaments'})

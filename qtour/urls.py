@@ -27,7 +27,7 @@ urlpatterns = [
     url(r'^your_tournaments/$', your_tournaments),
     url(r'^upcoming_tournaments/$', upcoming_tournaments),
     url(r'^past_tournaments/$', past_tournaments),
-    url(r'^edit_tournament/(?P<tour_id>[\d]+)/$', edit_tournament),
+    url(r'^tournament/(?P<tour_id>[\d]+)/$', tournament),
     url(r'^add_site/(?P<tour_id>[\d]+)/$', add_site),
-    url(r'^edit_site/(?P<site_id>[\d]+)/$', edit_site)
+    url(r'^site/(?P<site_id>[\d]+)/$', site)
 ]
