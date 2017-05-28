@@ -49,6 +49,8 @@ class TournamentForm(ModelForm):
             if self.mode == 'edit':
                 self.site_html += '<a href="/add_site/{}" class="btn btn-default">Add site</a>'.format(self.model.id)
             self.site_html += '</div></div>'
+
+
         else:
             self.model = None
             self.site_html = ''
@@ -119,6 +121,42 @@ class TournamentSiteForm(ModelForm):
 
         tour = Tournament.objects.get(id=self.tour_id)
         self.fields['tournament'] = forms.ChoiceField(choices=((tour.id, tour.name), ))
+
+        if self.mode == 'add':
+            self.helper.add_input(Submit('submit', 'Add site'))
+        elif self.mode == 'edit':
+            self.helper.add_input(Submit('submit', 'Submit'))
+        elif self.mode == 'view':
+            for key in self.fields.keys():
+                self.fields[key].widget.attrs['disabled'] = True
+
+
+class SchoolForm(ModelForm):
+
+    class Meta:
+        model = School
+        fields = ['name', 'city', 'state', 'country']
+
+    def __init__(self, *args, **kwargs):
+        if 'mode' in kwargs:
+            self.mode = kwargs.pop('mode')
+        else:
+            self.mode = 'view'
+
+        self.model = kwargs.get('instance', None)
+
+        super(SchoolForm, self).__init__(*args, **kwargs)
+
+        self.helper = FormHelper()
+        self.helper.form_id = 'new-school-form'
+        self.helper.form_class = 'form-horizontal'
+        self.helper.form_method = 'post'
+        if self.mode == 'add':
+            self.helper.form_action = '/add_school/'
+        elif self.mode == 'edit' and self.model is not None:
+            self.helper.form_action = '/school/{}/'.format(self.model.id)
+        self.helper.label_class = 'col-sm-2'
+        self.helper.field_class = 'col-sm-10'
 
         if self.mode == 'add':
             self.helper.add_input(Submit('submit', 'Add site'))

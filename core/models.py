@@ -23,6 +23,11 @@ class Tournament(models.Model):
     description = models.TextField(null=True)
     announcement_url = models.URLField(null=True)
 
+    adjustments = models.ManyToManyField('DiscountOrPenalty',
+                                         related_name='tournament_adjustments')
+    packet_adjustments = models.ManyToManyField('PacketDiscountOrPenalty',
+                                                related_name='tournament_packet_adjustments')
+
     owner = models.ForeignKey(QTourUser)
 
 
@@ -48,7 +53,10 @@ class School(models.Model):
     state = models.CharField(max_length=4, choices=[(state.abbr, state.name) for state in us.STATES])
     country = models.CharField(max_length=100)
 
-    manager = models.ForeignKey(QTourUser)
+    manager = models.ForeignKey(QTourUser, null=True)
+
+    def __str__(self):
+        return self.name + ', ' + self.city
 
 
 class Player(models.Model):
@@ -58,26 +66,46 @@ class Player(models.Model):
     middle_name = models.CharField(max_length=250, null=True)
 
 
+# discounts and penalties
+
 class DiscountOrPenalty(models.Model):
 
     name = models.CharField(max_length=100)
-    amount = models.IntegerField()
+    tournament = models.ForeignKey(Tournament, null=True)
+    site = models.ForeignKey(TournamentSite, null=True)
 
-    public = models.BooleanField(default=True)
+
+class StaffDiscount(DiscountOrPenalty):
+
+    discount_per_staffer = models.IntegerField()
+
+
+class BuzzerDiscount(DiscountOrPenalty):
+
+    discount_per_buzzer = models.IntegerField()
+
+
+class TravelDiscount(DiscountOrPenalty):
+
+    miles = models.IntegerField()
+    discount_per_miles = models.IntegerField()
 
 
 class PacketDiscountOrPenalty(DiscountOrPenalty):
 
     submission_date = models.DateField()
+    amount = models.IntegerField()
 
 
 class RegistrationEntry(models.Model):
 
     school = models.ForeignKey(School)
+    tournament = models.ForeignKey(Tournament)
+    site = models.ForeignKey(TournamentSite)
     buzzers = models.IntegerField()
     staff = models.IntegerField()
-    adjustments = models.ManyToManyField(DiscountOrPenalty)
-    packet_adjustments = models.ManyToManyField(PacketDiscountOrPenalty, related_name='packet_adjustments')
+    travel_distance = models.IntegerField()
+    packet_submitted_on = models.DateField()
 
 
 class Team(models.Model):

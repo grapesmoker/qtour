@@ -165,7 +165,6 @@ def tournament(request, tour_id):
 
     if tournament.owner == qtour_user:
         if request.method == 'GET':
-            tournament = Tournament.objects.get(id=tour_id)
             form = TournamentForm(instance=tournament, mode='edit')
             return render(request, 'tournament/tournament.html', {'form': form,
                                                                   'mode': 'edit',
@@ -185,10 +184,8 @@ def tournament(request, tour_id):
                                                                   'tour_id': tour_id,
                                                                   'user': qtour_user})
 
-
     else:
         if request.method == 'GET':
-            tournament = Tournament.objects.get(id=tour_id)
             form = TournamentForm(instance=tournament, mode='view')
             return render(request, 'tournament/site.html', {'form': form,
                                                             'tour_id': tour_id,
@@ -228,7 +225,6 @@ def add_site(request, tour_id):
                                                                 'user': qtour_user})
 
 
-@login_required
 def site(request, site_id):
 
     qtour_user = get_user(request)
@@ -294,3 +290,57 @@ def past_tournaments(request):
         return render(request, 'tournament/tournaments.html', {'user': qtour_user,
                                                                'tournaments': tournaments,
                                                                'caption': 'Past tournaments'})
+
+@login_required
+def manage_schools(request):
+
+    qtour_user = get_user(request)
+
+    if request.method == 'GET':
+        schools = School.objects.filter(manager=qtour_user)
+        return render(request, 'school/schools.html', {'user': qtour_user,
+                                                       'schools': schools,
+                                                       'caption': 'Schools You Are Managing'})
+
+
+@login_required
+def add_school(request):
+
+    qtour_user = get_user(request)
+
+    if request.method == 'GET':
+        form = SchoolForm(mode='add')
+        return render(request, 'school/school.html', {'form': form, 'user': qtour_user})
+
+    if request.method == 'POST':
+        form = SchoolForm(data=request.POST, mode='add')
+        if form.is_valid():
+            school = form.save()
+            school.manager = qtour_user
+            school.save()
+            return HttpResponseRedirect('/school/{}/'.format(school.id))
+        else:
+            return render(request, 'school/school.html', {'form': form,
+                                                            'user': qtour_user})
+
+
+def school(request, school_id):
+
+    qtour_user = get_user(request)
+    school = School.objects.get(id=school_id)
+
+    if school.manager == qtour_user:
+        if request.method == 'GET':
+            form = SchoolForm(instance=school, mode='edit')
+            return render(request, 'school/school.html', {'form': form, 'user': qtour_user})
+
+        elif request.method == 'POST':
+            form = SchoolForm(data=request.POST, instance=school, mode='edit')
+            if form.is_valid():
+                form.save()
+                return render(request, 'school/school.html', {'form': form, 'user': qtour_user})
+
+    else:
+        if request.method == 'GET':
+            form = SchoolForm(instance=school, mode='view')
+            return render(request, 'school/school.html', {'form': form, 'user': qtour_user})
